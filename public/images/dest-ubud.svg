@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" fill="none">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="900" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F2EAD9"/>
+      <stop offset="100%" stop-color="#D9C69F"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="68%" cy="28%" r="36%">
+      <stop offset="0%" stop-color="#F7F5EF" stop-opacity="0.9"/>
+      <stop offset="45%" stop-color="#B69A58" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#D9C69F" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="900" fill="url(#sky)"/>
+  <rect width="1200" height="900" fill="url(#sun)"/>
+  <!-- Distant volcanic ridge -->
+  <path d="M0 520 L260 380 L480 450 L740 240 L980 420 L1200 350 V900 H0 Z" fill="#52664E"/>
+  <!-- Midground terraces / slopes -->
+  <path d="M0 560 Q320 470 620 550 T1200 500 V900 H0 Z" fill="#344B35"/>
+  <path d="M0 640 Q280 580 580 650 T1200 610 V900 H0 Z" fill="#233324"/>
+  <!-- Subtle terrace contour lines -->
+  <path d="M0 695 Q360 640 720 705 T1200 680" stroke="#F7F5EF" stroke-opacity="0.22" stroke-width="2"/>
+  <path d="M0 745 Q340 695 700 755 T1200 735" stroke="#D8F36A" stroke-opacity="0.2" stroke-width="1.5"/>
+  <path d="M0 800 Q380 755 760 810 T1200 790" stroke="#F7F5EF" stroke-opacity="0.16" stroke-width="2"/>
+  <!-- Candi Bentar split gate silhouette --><path d="M470 760 L515 440 L555 440 L565 760 Z" fill="#191A18" fill-opacity="0.78"/><path d="M730 760 L685 440 L645 440 L635 760 Z" fill="#191A18" fill-opacity="0.78"/>
+</svg>

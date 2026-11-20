@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" fill="none">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="900" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#EFE8D6"/>
+      <stop offset="100%" stop-color="#D5C39B"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="68%" cy="28%" r="36%">
+      <stop offset="0%" stop-color="#F7F5EF" stop-opacity="0.9"/>
+      <stop offset="45%" stop-color="#B69A58" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#D5C39B" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="900" fill="url(#sky)"/>
+  <rect width="1200" height="900" fill="url(#sun)"/>
+  <!-- Distant volcanic ridge -->
+  <path d="M0 520 L260 380 L480 450 L740 240 L980 420 L1200 350 V900 H0 Z" fill="#6B5E42"/>
+  <!-- Midground terraces / slopes -->
+  <path d="M0 560 Q320 470 620 550 T1200 500 V900 H0 Z" fill="#4D5B3E"/>
+  <path d="M0 640 Q280 580 580 650 T1200 610 V900 H0 Z" fill="#344B35"/>
+  <!-- Subtle terrace contour lines -->
+  <path d="M0 695 Q360 640 720 705 T1200 680" stroke="#F7F5EF" stroke-opacity="0.22" stroke-width="2"/>
+  <path d="M0 745 Q340 695 700 755 T1200 735" stroke="#D8F36A" stroke-opacity="0.2" stroke-width="1.5"/>
+  <path d="M0 800 Q380 755 760 810 T1200 790" stroke="#F7F5EF" stroke-opacity="0.16" stroke-width="2"/>
+  <ellipse cx="600" cy="760" rx="280" ry="48" fill="#191A18" fill-opacity="0.55"/><ellipse cx="600" cy="744" rx="230" ry="38" fill="#B69A58" fill-opacity="0.75"/><circle cx="520" cy="738" r="28" fill="#D8F36A" fill-opacity="0.85"/><circle cx="620" cy="730" r="34" fill="#F7F5EF"/><circle cx="705" cy="742" r="22" fill="#9E472A"/>
+</svg>

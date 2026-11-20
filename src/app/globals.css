@@ -1,0 +1,266 @@
+@import "tailwindcss";
+
+@layer base {
+  :root,
+  [data-theme="dark"] {
+    --font: "Urbanist", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --fs-2xs: 11px;
+    --fs-xs: 12px;
+    --fs-sm: 12.5px;
+    --fs-md: 13.5px;
+    --fs-base: 14px;
+    --fs-lg: 15px;
+    --fs-xl: 17px;
+    --fs-2xl: 20px;
+    --fs-3xl: 22px;
+    --fs-4xl: 26px;
+    --fs-display: 34px;
+    --r-sm: 12px;
+    --r-md: 16px;
+    --r-lg: 24px;
+    --r-xl: 28px;
+
+    /* Cirrel Liquid Glass Dark Theme (Botanical Obsidian + Green, Zero Blue) */
+    --bg: #070a08;
+    --pool-1: rgba(52, 75, 53, 0.55);
+    --pool-2: rgba(75, 118, 78, 0.32);
+    --pool-3: rgba(216, 243, 106, 0.16);
+    --pool-4: rgba(182, 154, 88, 0.22);
+
+    --glass: rgba(24, 30, 26, 0.58);
+    --glass-hi: rgba(34, 42, 36, 0.78);
+    --glass-solid: rgba(16, 21, 18, 0.90);
+    --blur: blur(34px) saturate(175%);
+    --edge: rgba(255, 255, 255, 0.22);
+    --rim: rgba(255, 255, 255, 0.11);
+    --card: rgba(32, 39, 34, 0.56);
+    --card-2: rgba(255, 255, 255, 0.06);
+    --card-3: rgba(255, 255, 255, 0.11);
+
+    --ink: #f2f5f2;
+    --ink-2: #cdd6cf;
+    --muted: #93a196;
+    --accent-ink: #D8F36A;
+    --accent-soft-bg: rgba(216, 243, 106, 0.14);
+    --line: rgba(255, 255, 255, 0.09);
+    --line-2: rgba(255, 255, 255, 0.17);
+
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 18px 40px -22px rgba(0, 0, 0, 0.78);
+    --shadow-lg: 0 2px 6px rgba(0, 0, 0, 0.45), 0 36px 80px -26px rgba(0, 0, 0, 0.88);
+
+    /* Preserved Green Button Tokens (No Blue) */
+    --green: #344B35;
+    --green-hi: #486b4a;
+    --green-grad: linear-gradient(180deg, #4b704d 0%, #344B35 100%);
+    --green-glow: 0 10px 22px -8px rgba(75, 112, 77, 0.58);
+    --lime: #D8F36A;
+    --lime-grad: linear-gradient(180deg, #e5fa8c 0%, #D8F36A 100%);
+    --gold: #B69A58;
+    color-scheme: dark;
+  }
+
+  [data-theme="light"] {
+    --bg: #ebefe9;
+    --pool-1: rgba(216, 243, 106, 0.52);
+    --pool-2: rgba(52, 75, 53, 0.24);
+    --pool-3: rgba(90, 140, 94, 0.24);
+    --pool-4: rgba(182, 154, 88, 0.26);
+
+    --glass: rgba(255, 255, 255, 0.56);
+    --glass-hi: rgba(255, 255, 255, 0.78);
+    --glass-solid: rgba(247, 249, 245, 0.92);
+    --blur: blur(34px) saturate(190%);
+    --edge: rgba(255, 255, 255, 0.92);
+    --rim: rgba(18, 26, 20, 0.09);
+    --card: rgba(255, 255, 255, 0.64);
+    --card-2: rgba(18, 26, 20, 0.045);
+    --card-3: rgba(18, 26, 20, 0.085);
+
+    --ink: #0f1610;
+    --ink-2: #29352b;
+    --muted: #58655a;
+    --accent-ink: #274229;
+    --accent-soft-bg: rgba(52, 75, 53, 0.12);
+    --line: rgba(18, 26, 20, 0.08);
+    --line-2: rgba(18, 26, 20, 0.16);
+
+    --shadow: 0 1px 1px rgba(18, 26, 20, 0.04), 0 18px 40px -22px rgba(18, 26, 20, 0.26);
+    --shadow-lg: 0 2px 6px rgba(18, 26, 20, 0.08), 0 36px 76px -28px rgba(18, 26, 20, 0.34);
+    color-scheme: light;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    background-color: var(--bg);
+    color: var(--ink);
+    max-width: 100%;
+    overflow-x: clip;
+    overscroll-behavior-x: none;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: var(--fs-base);
+    font-weight: 500;
+    line-height: 1.45;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+    max-width: 100%;
+    overflow-x: clip;
+    overscroll-behavior-x: none;
+    touch-action: pan-y pinch-zoom;
+  }
+}
+
+.font-serif-display {
+  font-family: "Urbanist", system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.025em;
+}
+
+/* Cirrel Liquid Glass Primitives */
+.cirrel-glass {
+  background: var(--glass);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  box-shadow: inset 0 1px 0 var(--edge), inset 0 0 0 1px var(--rim), var(--shadow);
+}
+
+.cirrel-card {
+  background: var(--card);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border-radius: var(--r-lg);
+  box-shadow: inset 0 1px 0 var(--edge), inset 0 0 0 1px var(--rim), var(--shadow);
+}
+
+.editorial-card {
+  background: var(--card);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border-radius: var(--r-lg);
+  box-shadow: inset 0 1px 0 var(--edge), inset 0 0 0 1px var(--rim), var(--shadow);
+}
+
+.glass-surface {
+  background: var(--glass);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  box-shadow: inset 0 1px 0 var(--edge), inset 0 0 0 1px var(--rim), var(--shadow);
+}
+
+.glass-dark {
+  background: rgba(14, 18, 15, 0.78);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 0 0 1px rgba(255, 255, 255, 0.12), var(--shadow-lg);
+}
+
+/* Preserved Green Buttons (Zero Blue) */
+.btn-cirrel-green {
+  background: var(--green-grad);
+  color: #f4f7f2;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.26), var(--green-glow);
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), filter 0.2s ease;
+}
+
+.btn-cirrel-green:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.btn-cirrel-lime {
+  background: var(--lime-grad);
+  color: #141914;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 10px 24px -8px rgba(216, 243, 106, 0.35);
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), filter 0.2s ease;
+}
+
+.btn-cirrel-lime:hover {
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+}
+
+.cirrel-btn-ghost {
+  background: var(--card-2);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  transition: background-color 0.2s ease;
+}
+
+.cirrel-btn-ghost:hover {
+  background: var(--card-3);
+}
+
+.cirrel-input {
+  background: var(--card-2);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  border-radius: 12px;
+}
+
+.cirrel-input:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 1.5px var(--green-hi), 0 0 0 3px rgba(72, 107, 74, 0.25);
+}
+
+/* Cirrel Ambient Mesh Pools */
+.cirrel-ambient-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.cirrel-ambient-bg i {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(85px);
+}
+
+.cirrel-ambient-bg i:nth-child(1) {
+  width: 56vmax;
+  height: 56vmax;
+  top: -18vmax;
+  left: -10vmax;
+  background: radial-gradient(closest-side, var(--pool-1), transparent);
+}
+
+.cirrel-ambient-bg i:nth-child(2) {
+  width: 50vmax;
+  height: 50vmax;
+  top: 6vmax;
+  right: -12vmax;
+  background: radial-gradient(closest-side, var(--pool-2), transparent);
+}
+
+.cirrel-ambient-bg i:nth-child(3) {
+  width: 48vmax;
+  height: 48vmax;
+  bottom: -24vmax;
+  left: 10vmax;
+  background: radial-gradient(closest-side, var(--pool-3), transparent);
+}
+
+.cirrel-ambient-bg i:nth-child(4) {
+  width: 42vmax;
+  height: 42vmax;
+  bottom: -16vmax;
+  right: -8vmax;
+  background: radial-gradient(closest-side, var(--pool-4), transparent);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

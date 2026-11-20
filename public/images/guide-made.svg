@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="800" y2="1000" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#273728"/>
+      <stop offset="100%" stop-color="#191A18"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="32%" r="55%">
+      <stop offset="0%" stop-color="#D8F36A" stop-opacity="0.22"/>
+      <stop offset="60%" stop-color="#B69A58" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#191A18" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="1000" fill="url(#bg)"/>
+  <rect width="800" height="1000" fill="url(#glow)"/>
+  <!-- Architectural temple arch backdrop -->
+  <path d="M120 1000 V340 C120 175 245 90 400 90 C555 90 680 175 680 340 V1000" stroke="#B69A58" stroke-opacity="0.28" stroke-width="2"/>
+  <path d="M160 1000 V360 C160 215 268 135 400 135 C532 135 640 215 640 360 V1000" stroke="#F7F5EF" stroke-opacity="0.18" stroke-width="1.5"/>
+  <!-- Botanical fronds -->
+  <path d="M40 720 Q160 600 220 440 Q130 560 40 620 Z" fill="#344B35" fill-opacity="0.45"/>
+  <path d="M760 680 Q640 550 590 380 Q680 510 760 580 Z" fill="#344B35" fill-opacity="0.42"/>
+  <!-- Stylized editorial portrait silhouette -->
+  <circle cx="400" cy="405" r="108" fill="#C99774"/>
+  <path d="M292 365 C298 282 345 256 400 256 C455 256 502 282 508 365 L482 340 L400 356 L318 340 Z" fill="#344B35"/><path d="M312 342 Q400 315 488 342" stroke="#B69A58" stroke-width="4"/>
+  <!-- Neck & shoulders -->
+  <path d="M362 495 H438 V570 H362 Z" fill="#C99774"/>
+  <path d="M195 1000 C205 710 265 565 400 565 C535 565 595 710 605 1000 Z" fill="#F7F5EF"/>
+  <path d="M335 568 L400 660 L465 568" stroke="#B69A58" stroke-width="4" stroke-opacity="0.65" fill="none"/>
+  <!-- Subtle facial features -->
+  <path d="M360 392 Q372 385 384 392" stroke="#191A18" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M416 392 Q428 385 440 392" stroke="#191A18" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M380 440 Q400 456 420 440" stroke="#7A4935" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Editorial horizon rule -->
+  <circle cx="400" cy="405" r="245" stroke="#B69A58" stroke-opacity="0.22" stroke-dasharray="4 10"/>
+  <rect x="330" y="760" width="140" height="2" fill="#B69A58" fill-opacity="0.45"/>
+</svg>
