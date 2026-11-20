@@ -149,7 +149,7 @@ export function PublicNavbar({ session }: PublicNavbarProps) {
           }`}
         >
           {/* Left: Logo */}
-          <Link href="/" className="shrink-0 focus:outline-none">
+          <Link href="/" className="shrink-0 flex items-center pl-1 focus:outline-none">
             <BaliStorytellerLogo
               variant={useLightInk ? 'light' : 'dark'}
               compact={isScrolled}

@@ -56,6 +56,7 @@
     --lime: #D8F36A;
     --lime-grad: linear-gradient(180deg, #e5fa8c 0%, #D8F36A 100%);
     --gold: #B69A58;
+    --logo-filter: brightness(0) invert(1);
     color-scheme: dark;
   }
 
@@ -86,6 +87,7 @@
 
     --shadow: 0 1px 1px rgba(18, 26, 20, 0.04), 0 18px 40px -22px rgba(18, 26, 20, 0.26);
     --shadow-lg: 0 2px 6px rgba(18, 26, 20, 0.08), 0 36px 76px -28px rgba(18, 26, 20, 0.34);
+    --logo-filter: none;
     color-scheme: light;
   }
 
