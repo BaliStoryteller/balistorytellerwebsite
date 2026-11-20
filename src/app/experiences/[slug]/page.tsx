@@ -91,8 +91,8 @@ export default async function ExperienceDetailPage({
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Content */}
-          <div className="lg:col-span-7 min-w-0 space-y-8">
+          {/* Overview & Approved Guides (Row 1 Left on Desktop, Top on Mobile) */}
+          <div className="lg:col-span-7 lg:col-start-1 lg:row-start-1 min-w-0 space-y-8">
             <div className="space-y-4">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-full bg-[#344B35] text-[#D8F36A] px-3.5 py-1 text-xs font-semibold">
@@ -158,7 +158,36 @@ export default async function ExperienceDetailPage({
                 ))}
               </div>
             </section>
+          </div>
 
+          {/* Dedicated Experience Booking Section (Separate Section on Mobile, Sticky Right Sidebar on Desktop) */}
+          <section
+            id="book-experience"
+            aria-label="Experience Booking"
+            className="scroll-mt-24 lg:col-span-5 lg:col-start-8 lg:row-start-1 lg:row-span-2 min-w-0 lg:sticky lg:top-24 rounded-[28px] bg-[var(--card-2)]/65 border border-[var(--line)] p-4 sm:p-6 lg:p-0 lg:bg-transparent lg:border-0 lg:rounded-none space-y-4 lg:space-y-0"
+          >
+            <div className="lg:hidden space-y-1 px-1">
+              <span className="inline-block rounded-full bg-[#344B35] text-[#D8F36A] px-3 py-0.5 text-[10.5px] font-bold uppercase tracking-[0.16em]">
+                Experience Booking
+              </span>
+              <h2 className="font-serif-display text-2xl font-medium text-[var(--ink)]">
+                Plan &amp; Reserve in 4 Steps
+              </h2>
+              <p className="text-xs text-[var(--muted)] leading-relaxed">
+                Pick your guide, choose an open date, enter your details, then review your
+                Experience Summary before submitting.
+              </p>
+            </div>
+
+            <ExperienceBookingFlow
+              experience={experience}
+              guides={associatedGuides.length > 0 ? associatedGuides : allGuides}
+              availability={state.availability}
+            />
+          </section>
+
+          {/* Itinerary, Inclusions & Reviews (Row 2 Left on Desktop, Below Booking Section on Mobile) */}
+          <div className="lg:col-span-7 lg:col-start-1 lg:row-start-2 min-w-0 space-y-8">
             {/* Itinerary Stops */}
             <section className="editorial-card p-6 sm:p-8 space-y-5">
               <h2 className="font-serif-display text-2xl sm:text-3xl font-medium text-[var(--ink)]">
@@ -204,7 +233,7 @@ export default async function ExperienceDetailPage({
 
               <div className="editorial-card p-6 space-y-3">
                 <h3 className="font-serif-display text-xl font-semibold text-[var(--ink)]">
-                  Not Included & Meeting
+                  Not Included &amp; Meeting
                 </h3>
                 <ul className="space-y-2 text-sm text-[var(--muted)]">
                   {experience.exclusions.map((item) => (
@@ -249,15 +278,6 @@ export default async function ExperienceDetailPage({
                 ))}
               </section>
             )}
-          </div>
-
-          {/* Right Column: Dedicated Experience Booking Flow */}
-          <div id="book-experience" className="lg:col-span-5 min-w-0 lg:sticky lg:top-24">
-            <ExperienceBookingFlow
-              experience={experience}
-              guides={associatedGuides.length > 0 ? associatedGuides : allGuides}
-              availability={state.availability}
-            />
           </div>
         </div>
       </main>

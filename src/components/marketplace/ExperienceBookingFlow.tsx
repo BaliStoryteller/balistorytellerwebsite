@@ -7,16 +7,20 @@ import {
   Calendar,
   CheckCircle2,
   Clock,
+  Edit3,
   Languages,
+  Mail,
+  MapPin,
   Minus,
   Plus,
   ShieldCheck,
   Sparkles,
   Star,
+  User,
   Users,
 } from 'lucide-react';
 import { MonthlyScheduleCalendar } from '@/components/marketplace/MonthlyScheduleCalendar';
-import { formatShortWindow } from '@/lib/date-utils';
+import { formatShortDate, formatShortWindow } from '@/lib/date-utils';
 import type {
   Experience,
   Guide,
@@ -27,6 +31,41 @@ interface ExperienceBookingFlowProps {
   experience: Experience;
   guides: Guide[];
   availability: GuideAvailabilitySlot[];
+}
+
+function findFirstAvailableDate(
+  guide: Guide,
+  availability: GuideAvailabilitySlot[]
+): string {
+  const blockedOrBooked = new Set(
+    availability
+      .filter(
+        (a) =>
+          a.guideId === guide.id &&
+          (a.status === 'blocked' || a.status === 'booked')
+      )
+      .map((a) => a.date)
+  );
+
+  const startIso =
+    guide.availableFrom && guide.availableFrom > '2026-11-20'
+      ? guide.availableFrom
+      : '2026-11-20';
+  const [y, m, d] = startIso.split('-').map(Number);
+  const cursor = new Date(Date.UTC(y || 2026, (m || 11) - 1, d || 20));
+
+  for (let i = 0; i < 60; i++) {
+    const iso = cursor.toISOString().slice(0, 10);
+    const outOfRange =
+      (guide.availableFrom && iso < guide.availableFrom) ||
+      (guide.availableUntil && iso > guide.availableUntil);
+    if (!outOfRange && !blockedOrBooked.has(iso)) {
+      return iso;
+    }
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+
+  return startIso;
 }
 
 export function ExperienceBookingFlow({
@@ -44,7 +83,7 @@ export function ExperienceBookingFlow({
     return Array.from(set);
   }, [guides]);
 
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [selectedLanguage, setSelectedLanguage] = useState<string>('');
   const [guideId, setGuideId] = useState<string>('');
   const [bookingDate, setBookingDate] = useState<string>('2026-11-25');
@@ -84,23 +123,60 @@ export function ExperienceBookingFlow({
   const isDateBlocked =
     dateSlot?.status === 'blocked' || dateSlot?.status === 'booked' || isOutOfRange;
 
+  const detailsValid = Boolean(
+    customerName.trim().length >= 2 &&
+      customerEmail.trim().includes('@') &&
+      customerEmail.trim().includes('.')
+  );
+
   const totalAmount = Number((experience.priceUsd * guestCount).toFixed(2));
 
+  const selectGuideWithOpenDate = (guide: Guide | undefined) => {
+    if (!guide) {
+      setGuideId('');
+      return;
+    }
+    setGuideId(guide.id);
+    setBookingDate(findFirstAvailableDate(guide, availability));
+  };
+
   const handleLanguagePick = (lang: string) => {
+    setErrorMsg(null);
     setSelectedLanguage(lang);
     const firstMatch = guides.find((g) =>
       g.languages.some((l) => l.language === lang)
     );
-    if (firstMatch) {
-      setGuideId(firstMatch.id);
-    } else {
-      setGuideId('');
+    selectGuideWithOpenDate(firstMatch);
+  };
+
+  const handleAdvanceFromDetails = () => {
+    setErrorMsg(null);
+    if (!customerName.trim()) {
+      setErrorMsg('Please enter your full name so your guide knows who to welcome.');
+      return;
     }
+    if (!customerEmail.trim() || !customerEmail.includes('@')) {
+      setErrorMsg('Please enter a valid email address for your booking confirmation.');
+      return;
+    }
+    setStep(4);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
+
+    if (step !== 4) {
+      if (step === 1 && guideId) {
+        setStep(2);
+      } else if (step === 2 && !isDateBlocked) {
+        setStep(3);
+      } else if (step === 3) {
+        handleAdvanceFromDetails();
+      }
+      return;
+    }
+
     if (!selectedGuide || !selectedLanguage) {
       setErrorMsg('Please select a language and guide first.');
       setStep(1);
@@ -109,6 +185,11 @@ export function ExperienceBookingFlow({
     if (isDateBlocked) {
       setErrorMsg('That date is unavailable for this guide. Please choose another date.');
       setStep(2);
+      return;
+    }
+    if (!detailsValid) {
+      setErrorMsg('Please check your name and email address before submitting.');
+      setStep(3);
       return;
     }
 
@@ -125,10 +206,10 @@ export function ExperienceBookingFlow({
           durationHours: experience.durationHours,
           preferredLanguage: selectedLanguage,
           guestCount,
-          customerName,
-          customerEmail,
-          customerPhone,
-          specialRequests,
+          customerName: customerName.trim(),
+          customerEmail: customerEmail.trim(),
+          customerPhone: customerPhone.trim(),
+          specialRequests: specialRequests.trim(),
           idempotencyKey: `exp-${experience.id}-${selectedGuide.id}-${bookingDate}-${Date.now()}`,
         }),
       });
@@ -168,31 +249,42 @@ export function ExperienceBookingFlow({
         </div>
       </div>
 
-      {/* Clear 3-Step Visual Breadcrumb */}
-      <div className="grid grid-cols-3 gap-1.5">
-        {[
-          [1, '1. Guide'],
-          [2, '2. Date'],
-          [3, '3. Details'],
-        ].map(([num, label]) => {
-          const n = num as 1 | 2 | 3;
+      {/* Clear 4-Step Guided Flow */}
+      <div className="grid grid-cols-4 gap-1.5">
+        {(
+          [
+            [1, '1. Guide'],
+            [2, '2. Date'],
+            [3, '3. Details'],
+            [4, '4. Summary'],
+          ] as const
+        ).map(([n, label]) => {
           const active = step === n;
           const done = step > n;
+          const canJump =
+            n === 1 ||
+            (n === 2 && Boolean(guideId)) ||
+            (n === 3 && Boolean(guideId) && !isDateBlocked) ||
+            (n === 4 && Boolean(guideId) && !isDateBlocked && detailsValid);
           return (
             <button
               key={n}
               type="button"
+              disabled={!canJump}
               onClick={() => {
-                if (n === 1 || (n === 2 && guideId) || (n === 3 && guideId && !isDateBlocked)) {
+                if (canJump) {
+                  setErrorMsg(null);
                   setStep(n);
                 }
               }}
-              className={`rounded-full py-1.5 px-2 text-[11.5px] font-semibold text-center transition-all cursor-pointer ${
+              className={`rounded-full py-1.5 px-1.5 text-[11px] font-semibold text-center transition-all truncate ${
                 active
-                  ? 'btn-cirrel-green'
+                  ? 'btn-cirrel-green cursor-pointer'
                   : done
-                  ? 'bg-[#D8F36A]/35 text-[var(--accent-ink)]'
-                  : 'bg-[var(--card-2)] text-[var(--muted)]'
+                  ? 'bg-[#D8F36A]/35 text-[var(--accent-ink)] cursor-pointer'
+                  : canJump
+                  ? 'bg-[var(--card-2)] text-[var(--ink)] cursor-pointer'
+                  : 'bg-[var(--card-2)] text-[var(--muted)] opacity-60 cursor-not-allowed'
               }`}
             >
               {label}
@@ -215,7 +307,7 @@ export function ExperienceBookingFlow({
             <div className="space-y-2">
               <label className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[var(--muted)]">
                 <Languages className="w-3.5 h-3.5 text-[var(--accent-ink)]" />
-                Step 1 · Select Your Language First
+                Step 1A · Choose Preferred Language
               </label>
               <div className="flex flex-wrap gap-1.5">
                 {availableLanguages.map((lang) => {
@@ -237,14 +329,14 @@ export function ExperienceBookingFlow({
             </div>
 
             {!selectedLanguage ? (
-              <div className="rounded-[18px] bg-[var(--card-2)] border border-[var(--line)] p-4 text-xs text-[var(--muted)]">
-                Choose a language above to see verified storytellers who lead this journey in
-                your language.
+              <div className="rounded-[18px] bg-[var(--card-2)] border border-[var(--line)] p-4 text-xs text-[var(--muted)] leading-relaxed">
+                Select a language above first so we can match you with verified Balinese
+                storytellers who speak it fluently.
               </div>
             ) : (
               <div className="space-y-2">
                 <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--accent-ink)]">
-                  Step 2 · Choose Your {selectedLanguage}-Speaking Guide
+                  Step 1B · Pick Your {selectedLanguage}-Speaking Guide
                 </label>
                 <div className="space-y-2">
                   {matchingGuides.map((g) => {
@@ -253,7 +345,7 @@ export function ExperienceBookingFlow({
                       <button
                         key={g.id}
                         type="button"
-                        onClick={() => setGuideId(g.id)}
+                        onClick={() => selectGuideWithOpenDate(g)}
                         className={`w-full rounded-[18px] p-3 border text-left flex items-center justify-between gap-3 transition-all cursor-pointer ${
                           active
                             ? 'bg-[#344B35]/30 border-[#D8F36A]'
@@ -276,7 +368,7 @@ export function ExperienceBookingFlow({
                               </span>
                               <span>·</span>
                               <span className="truncate">
-                                {formatShortWindow(g.availableFrom, g.availableUntil)}
+                                Available: {formatShortWindow(g.availableFrom, g.availableUntil)}
                               </span>
                             </p>
                           </div>
@@ -294,10 +386,13 @@ export function ExperienceBookingFlow({
             <button
               type="button"
               disabled={!guideId}
-              onClick={() => setStep(2)}
+              onClick={() => {
+                setErrorMsg(null);
+                setStep(2);
+              }}
               className="w-full rounded-full btn-cirrel-green py-3 text-sm font-semibold cursor-pointer disabled:opacity-45"
             >
-              Next: Pick Date & Guests
+              Continue to Date &amp; Guests
             </button>
           </div>
         )}
@@ -331,7 +426,7 @@ export function ExperienceBookingFlow({
             <div>
               <label className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[var(--muted)] mb-1.5">
                 <Calendar className="w-3.5 h-3.5 text-[var(--accent-ink)]" />
-                Pick an Available Date
+                Pick an Open Date
               </label>
               <MonthlyScheduleCalendar
                 mode="popover"
@@ -341,7 +436,10 @@ export function ExperienceBookingFlow({
                 availableFrom={selectedGuide.availableFrom}
                 availableUntil={selectedGuide.availableUntil}
                 selectedDate={bookingDate}
-                onSelectDate={setBookingDate}
+                onSelectDate={(iso) => {
+                  setErrorMsg(null);
+                  setBookingDate(iso);
+                }}
               />
             </div>
 
@@ -349,7 +447,9 @@ export function ExperienceBookingFlow({
               <div className="flex items-center gap-2">
                 <Users className="w-4 h-4 text-[var(--accent-ink)]" />
                 <div>
-                  <span className="block text-xs font-bold text-[var(--ink)]">Travelers</span>
+                  <span className="block text-xs font-bold text-[var(--ink)]">
+                    Number of Travelers
+                  </span>
                   <span className="block text-[10.5px] text-[var(--muted)]">
                     Max {experience.maxGuests} guests
                   </span>
@@ -380,10 +480,9 @@ export function ExperienceBookingFlow({
               </div>
             </div>
 
-            {/* Live Price Preview */}
             <div className="rounded-[16px] bg-[var(--card-2)] border border-[var(--line)] px-4 py-3 flex items-center justify-between text-xs">
               <span className="text-[var(--muted)]">
-                {guestCount} × ${experience.priceUsd}
+                Estimated total ({guestCount} × ${experience.priceUsd})
               </span>
               <span className="text-base font-bold text-[var(--ink)] tabular-nums">
                 ${totalAmount.toFixed(2)} USD
@@ -401,80 +500,218 @@ export function ExperienceBookingFlow({
               <button
                 type="button"
                 disabled={isDateBlocked}
-                onClick={() => setStep(3)}
+                onClick={() => {
+                  setErrorMsg(null);
+                  setStep(3);
+                }}
                 className="w-2/3 rounded-full btn-cirrel-green py-2.5 text-sm font-semibold cursor-pointer disabled:opacity-45"
               >
-                Next: Traveler Details
+                Continue to Your Details
               </button>
             </div>
           </div>
         )}
 
-        {/* STEP 3: TRAVELER DETAILS & SUMMARY */}
+        {/* STEP 3: CLEAN TRAVELER DETAILS ONLY (NO SUMMARY MIXED IN) */}
         {step === 3 && selectedGuide && (
-          <div className="space-y-3.5">
-            <div className="space-y-2.5">
-              <input
-                type="text"
-                required
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                placeholder="Your Full Name *"
-                className="w-full cirrel-input px-4 py-2.5 text-sm"
-              />
-              <input
-                type="email"
-                required
-                value={customerEmail}
-                onChange={(e) => setCustomerEmail(e.target.value)}
-                placeholder="Email Address *"
-                className="w-full cirrel-input px-4 py-2.5 text-sm"
-              />
-              <input
-                type="tel"
-                value={customerPhone}
-                onChange={(e) => setCustomerPhone(e.target.value)}
-                placeholder="WhatsApp / Phone (optional)"
-                className="w-full cirrel-input px-4 py-2.5 text-sm"
-              />
-              <textarea
-                rows={2}
-                value={specialRequests}
-                onChange={(e) => setSpecialRequests(e.target.value)}
-                placeholder="Dietary preferences, hotel pickup note..."
-                className="w-full cirrel-input px-4 py-2.5 text-sm"
-              />
-            </div>
-
-            <div className="rounded-[18px] bg-[#141914] text-[#f2f5f2] p-4 space-y-1.5 text-xs">
-              <div className="flex items-center justify-between text-[#D8F36A] font-semibold">
-                <span className="inline-flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5" /> Experience Summary
-                </span>
-                <span>{selectedGuide.displayName}</span>
-              </div>
-              <p className="text-white/80 font-medium">{experience.title}</p>
-              <p className="text-white/65 inline-flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5" /> {bookingDate} · {selectedLanguage} ·{' '}
-                {guestCount} guests
-              </p>
-              <div className="pt-2 mt-1 border-t border-white/15 flex items-center justify-between">
-                <span className="text-white/75">Total Rate</span>
-                <span className="text-lg font-bold text-[#D8F36A] tabular-nums">
-                  ${totalAmount.toFixed(2)} USD
-                </span>
-              </div>
-            </div>
-
-            <p className="flex items-center gap-1.5 text-[11px] text-[var(--muted)]">
-              <ShieldCheck className="w-4 h-4 text-[var(--accent-ink)] shrink-0" />
-              Availability is verified server-side and rates are locked on request.
+          <div className="space-y-4">
+            <p className="text-xs text-[var(--muted)] leading-relaxed">
+              Where should we send your confirmation and guide meetup notes? No account or
+              card payment is needed right now.
             </p>
+
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--muted)]">
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  placeholder="e.g. Sarah Wijaya"
+                  className="w-full cirrel-input px-4 py-2.5 text-sm"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--muted)]">
+                  Email Address *
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={customerEmail}
+                  onChange={(e) => setCustomerEmail(e.target.value)}
+                  placeholder="e.g. sarah@example.com"
+                  className="w-full cirrel-input px-4 py-2.5 text-sm"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--muted)]">
+                  WhatsApp / Phone (Optional)
+                </label>
+                <input
+                  type="tel"
+                  value={customerPhone}
+                  onChange={(e) => setCustomerPhone(e.target.value)}
+                  placeholder="For pickup or meetup updates"
+                  className="w-full cirrel-input px-4 py-2.5 text-sm"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--muted)]">
+                  Special Requests or Hotel Pickup (Optional)
+                </label>
+                <textarea
+                  rows={2}
+                  value={specialRequests}
+                  onChange={(e) => setSpecialRequests(e.target.value)}
+                  placeholder="Dietary notes, hotel name, or pace preference..."
+                  className="w-full cirrel-input px-4 py-2.5 text-sm"
+                />
+              </div>
+            </div>
 
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setStep(2)}
+                className="w-1/3 rounded-full cirrel-btn-ghost py-3 text-xs font-semibold cursor-pointer"
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                onClick={handleAdvanceFromDetails}
+                className="w-2/3 rounded-full btn-cirrel-green py-3 text-sm font-semibold cursor-pointer"
+              >
+                Review Experience Summary
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 4: DEDICATED FINAL EXPERIENCE SUMMARY BEFORE SUBMIT */}
+        {step === 4 && selectedGuide && (
+          <div className="space-y-4">
+            <div className="space-y-0.5">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--accent-ink)]">
+                Final Step · Review Before Sending
+              </span>
+              <p className="text-xs text-[var(--muted)]">
+                Confirm your experience details below before submitting your booking request.
+              </p>
+            </div>
+
+            <div className="rounded-[20px] bg-[#141914] text-[#f2f5f2] p-4 space-y-3 text-xs border border-white/10">
+              <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-white/12">
+                <span className="inline-flex items-center gap-1.5 text-[#D8F36A] font-bold">
+                  <Sparkles className="w-3.5 h-3.5" /> Experience Summary
+                </span>
+                <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[10.5px] font-semibold text-white/85">
+                  {experience.durationLabel}
+                </span>
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-white leading-snug">
+                  {experience.title}
+                </p>
+                <p className="text-white/70 flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-[#D8F36A] shrink-0" />
+                  <span>{experience.meetingPoint}</span>
+                </p>
+              </div>
+
+              {/* Selected Guide & Date */}
+              <div className="rounded-[14px] bg-white/6 p-3 flex items-center gap-3">
+                <img
+                  src={selectedGuide.profilePhotoUrl}
+                  alt={selectedGuide.displayName}
+                  className="h-9 w-9 rounded-full object-cover border border-[#D8F36A]/50 shrink-0"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-white truncate">
+                    {selectedGuide.displayName}
+                  </p>
+                  <p className="text-[11px] text-white/70 flex flex-wrap items-center gap-x-2">
+                    <span className="inline-flex items-center gap-1">
+                      <Calendar className="w-3 h-3 text-[#D8F36A]" />
+                      {formatShortDate(bookingDate)}
+                    </span>
+                    <span>·</span>
+                    <span>{selectedLanguage}</span>
+                    <span>·</span>
+                    <span>
+                      {guestCount} {guestCount === 1 ? 'guest' : 'guests'}
+                    </span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Traveler Contact Review + Quick Edit */}
+              <div className="rounded-[14px] bg-white/6 p-3 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10.5px] font-bold uppercase tracking-wider text-white/60">
+                    Your Contact Info
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setStep(3)}
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#D8F36A] hover:underline cursor-pointer"
+                  >
+                    <Edit3 className="w-3 h-3" /> Edit
+                  </button>
+                </div>
+                <p className="text-white/90 flex items-center gap-1.5">
+                  <User className="w-3.5 h-3.5 text-[#D8F36A] shrink-0" />
+                  <span>{customerName}</span>
+                </p>
+                <p className="text-white/75 flex items-center gap-1.5">
+                  <Mail className="w-3.5 h-3.5 text-[#D8F36A] shrink-0" />
+                  <span className="truncate">{customerEmail}</span>
+                </p>
+                {customerPhone && (
+                  <p className="text-white/70 text-[11px]">WhatsApp: {customerPhone}</p>
+                )}
+                {specialRequests && (
+                  <p className="text-white/70 text-[11px] pt-1 border-t border-white/10">
+                    Note: {specialRequests}
+                  </p>
+                )}
+              </div>
+
+              {/* Total Rate Breakdown */}
+              <div className="pt-2.5 border-t border-white/15 space-y-1">
+                <div className="flex items-center justify-between text-white/70">
+                  <span className="inline-flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5" />
+                    {guestCount} × ${experience.priceUsd} per guest
+                  </span>
+                  <span className="tabular-nums">${totalAmount.toFixed(2)}</span>
+                </div>
+                <div className="flex items-center justify-between pt-1">
+                  <span className="font-semibold text-white">Total Rate</span>
+                  <span className="text-lg font-bold text-[#D8F36A] tabular-nums">
+                    ${totalAmount.toFixed(2)} USD
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <p className="flex items-center gap-1.5 text-[11px] text-[var(--muted)]">
+              <ShieldCheck className="w-4 h-4 text-[var(--accent-ink)] shrink-0" />
+              Availability is verified server-side and rates are locked when you submit.
+            </p>
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setStep(3)}
                 className="w-1/3 rounded-full cirrel-btn-ghost py-3 text-xs font-semibold cursor-pointer"
               >
                 Back
